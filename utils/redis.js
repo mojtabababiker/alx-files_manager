@@ -24,7 +24,7 @@ class RedisClient {
    * @returns {boolean} true if the connection is a live false other wise
    */
   isAlive() {
-    return (this.client !== undefined);
+    return (this.client.connected);
   }
 
   /**

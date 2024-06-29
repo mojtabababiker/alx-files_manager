@@ -14,8 +14,8 @@ export function getStatus(req, res) {
    */
 
   const status = {
-    redis: dbClient.isAlive(),
-    db: redisClient.isAlive(),
+    db: dbClient.isAlive(),
+    redis: redisClient.isAlive(),
   };
   res.json(status);
 }
