@@ -92,4 +92,5 @@ export class DBClient {
   }
 }
 
-export const dbClient = new DBClient();  // eslint-disable-line
+const dbClient = new DBClient();
+export default dbClient;

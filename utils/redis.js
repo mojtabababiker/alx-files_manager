@@ -17,6 +17,7 @@ class RedisClient {
     this.client = createClient();
     this.client.on('error', (error) => {
       console.log(error.message);
+      this.client = undefined;
     });
   }
 
@@ -25,7 +26,7 @@ class RedisClient {
      * isAlive check if the connection to redis server is a live
      * @returns {boolean} true if the connection is a live false other wise
      */
-    return !(this.client === undefined);
+    return (this.client !== undefined);
   }
 
   async get(key) {
@@ -38,6 +39,7 @@ class RedisClient {
       this.client.get(`${key}`, (error, result) => {
         if (error) {
           reject(error.message);
+          return;
         }
         resolve(result);
       });
@@ -67,4 +69,7 @@ class RedisClient {
   }
 }
 
-export const redisClient = new RedisClient(); // eslint-disable-line
+const redisClient = new RedisClient();
+
+export default redisClient;
+
