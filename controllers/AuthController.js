@@ -50,7 +50,7 @@ export async function getConnect(req, res) {
     await redisClient.set(token, user._id, 1000 * 60 * 60 * 24);
     res.json({ token });
   } catch (error) {
-    console.log(error.message);
+    // console.log(error.message);
     res.status(400).json({ error: 'Bad Auth Schema' });
     return;
   }
@@ -78,7 +78,7 @@ export async function getDisconnect(req, res) {
       return;
     }
   } catch (error) {
-    console.log(error.message);
+    // console.log(error.message);
   }
   res.status(401).json({ error: 'Unauthorized' });
 }
@@ -105,7 +105,7 @@ export async function getMe(req, res) {
       }
     }
   } catch (error) {
-    console.log(error.message);
+    // console.log(error.message);
     // throw error;
   }
   res.status(401).json({ error: 'Unauthorized' });

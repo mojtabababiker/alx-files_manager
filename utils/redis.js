@@ -14,7 +14,8 @@ class RedisClient {
      * construct the redis client for the class
      * handle any connection error and log it
      */
-    this.client = createClient().on('failure', (error) => {
+    this.client = createClient();
+    this.client.on('error', (error) => {
       console.log(error.message);
     });
   }

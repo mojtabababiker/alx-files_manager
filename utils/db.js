@@ -19,8 +19,6 @@ export class DBClient {
     MongoClient.connect(`mongodb://${this.host}:${this.port}`, { useUnifiedTopology: true }, (error, client) => {
       if (!error) {
         this.db = client.db(this.database);
-      } else {
-        console.log(error.message);
       }
     });
   }
@@ -87,7 +85,7 @@ export class DBClient {
       const user = await this.db.collection('users').findOne(filters);
       return user;
     } catch (error) {
-      console.log(error.message);
+      // console.log(error.message);
       // throw error
       return null;
     }
