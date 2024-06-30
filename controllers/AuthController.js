@@ -29,7 +29,7 @@ export async function getConnect(req, res) {
     // console.log(credentials);
     const [email, pwd] = credentials.split(':');
 
-    const user = await dbClient.getUser({ email });
+    const user = await dbClient.getDoc('users', { email });
     // if no user with email email
     if (!user) {
       // console.log("NOt User");
@@ -47,12 +47,11 @@ export async function getConnect(req, res) {
 
     // create access token
     const token = addAccessToken();
-    await redisClient.set(`auth_${token}`, user._id, 1000 * 60 * 60 * 24);
+    await redisClient.set(`auth_${token}`, user._id.toString(), 1000 * 60 * 60 * 24);
     res.json({ token });
   } catch (error) {
     // console.log(error.message);
     res.status(400).json({ error: 'Bad Auth Schema' });
-    return;
   }
 }
 
@@ -69,7 +68,7 @@ export async function getDisconnect(req, res) {
   const token = req.headers['x-token'];
   try {
     const result = await redisClient.get(`auth_${token}`);
-    const user = await dbClient.getUser({ _id: result });
+    const user = await dbClient.getDoc('users', { _id: result });
     // console.log(result);
     if (user) {
       await redisClient.del(`auth_${token}`);
@@ -97,7 +96,7 @@ export async function getMe(req, res) {
     const result = await redisClient.get(`auth_${token}`);
     // console.log(result);
     if (result) {
-      const user = await dbClient.getUser({ _id: result });
+      const user = await dbClient.getDoc('users', { _id: result });
       if (user) {
         res.json({ email: user.email, id: user._id });
         return;

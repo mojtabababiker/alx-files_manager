@@ -72,20 +72,21 @@ export class DBClient {
     }
   }
 
-  async getUser(filters) {
-    /**
-     * Get user from database filtered by filters object
-     * @param {object} filters - object of the filters yo apply on the query
-     * @return {object} contains the fetched user object, or empty object
-     */
+  /**
+   * Get document from database filtered by filters object
+   * @param {string} collection
+   * @param {object} filters - object of the filters yo apply on the query
+   * @return {object} contains the fetched user object, or empty object
+   */
+  async getDoc(collection, filters) {
     try {
       if ('_id' in filters) {
         filters._id = new ObjectId(filters._id);  // eslint-disable-line
       }
-      const user = await this.db.collection('users').findOne(filters);
-      return user;
+      const doc = await this.db.collection(collection).findOne(filters);
+      return doc;
     } catch (error) {
-      // console.log(error.message);
+      console.log(error.message);
       // throw error
       return null;
     }
