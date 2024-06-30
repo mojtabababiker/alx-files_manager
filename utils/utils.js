@@ -8,7 +8,7 @@ import redisClient from './redis';
  * @return {string}
  */
 function addAccessToken() {
-  return uuid.v4();
+  return uuid.v4().toString();
 }
 
 /**

@@ -30,7 +30,7 @@ class RedisClient {
   /**
    * query the redis database for the key and returns it's value if available
    * @param {string} key - the key to fetch from redis
-   * @returns {string} the value of the key or undefined if it's not available
+   * @returns {Promise{string}} the value of the key or undefined if it's not available
    */
   async get(key) {
     return new Promise((resolve, reject) => {

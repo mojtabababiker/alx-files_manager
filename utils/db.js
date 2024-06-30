@@ -80,7 +80,7 @@ export class DBClient {
      */
     try {
       if ('_id' in filters) {
-        filters._id = new ObjectId(JSON.parse(filters._id));  // eslint-disable-line
+        filters._id = new ObjectId(filters._id);  // eslint-disable-line
       }
       const user = await this.db.collection('users').findOne(filters);
       return user;
