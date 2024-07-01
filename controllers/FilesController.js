@@ -4,7 +4,7 @@
 import * as path from 'path';
 import fs from '../utils/fs/promises';
 import {
-  dbClient, redisClient,
+  dbClient, getUserFromToken,
 } from '../utils/utils';
 
 /**
@@ -20,53 +20,45 @@ import {
 export async function postUpload(req, res) {
   const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
   let parentName = ''; // to save the file on if specified later
-  let userId; // id of the owner of the file
   const {
     name, type, parentId, isPublic, data,
   } = req.body;
-  const token = req.headers['x-token'];
-  try {
-    userId = await redisClient.get(`auth_${token}`);
-    const user = await dbClient.getDoc('users', { _id: userId });
-    if (!user) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
 
-    if (!name) {
-      res.status(400).json({ error: 'Missing name' });
-      return;
-    }
-    if (!type) {
-      res.status(400).json({ error: 'Missing type' });
-      return;
-    }
-    if (type !== 'folder' && !data) {
-      res.status(400).json({ error: 'Missing data' });
-      return;
-    }
-    if (parentId) {
-      try {
-        const parent = await dbClient.getDoc('files', { _id: parentId });
-        if (parent.type !== 'folder') {
-          res.status(400).json({ error: 'Parent is not folder' });
-          return;
-        }
-        parentName = parent.name; // update the parent name above
-      } catch (error) {
-        res.status(400).json({ error: 'Parent not found' });
-        return;
-      }
-    }
-  } catch (error) {
-    console.log(error.message);
+  const user = await getUserFromToken(req.headers['x-token']);
+  if (!user) {
     res.status(401).json({ error: 'Unauthorized' });
     return;
   }
 
+  if (!name) {
+    res.status(400).json({ error: 'Missing name' });
+    return;
+  }
+  if (!type) {
+    res.status(400).json({ error: 'Missing type' });
+    return;
+  }
+  if (type !== 'folder' && !data) {
+    res.status(400).json({ error: 'Missing data' });
+    return;
+  }
+  if (parentId) {
+    try {
+      const parent = await dbClient.getDoc('files', { _id: parentId });
+      if (parent.type !== 'folder') {
+        res.status(400).json({ error: 'Parent is not folder' });
+        return;
+      }
+      parentName = parent.name; // update the parent name above
+    } catch (error) {
+      res.status(400).json({ error: 'Parent not found' });
+      return;
+    }
+  }
+
   if (type === 'folder') {
     const docObject = {
-      userId,
+      userId: user._id,
       name,
       type,
       isPublic: Boolean(isPublic),
@@ -82,7 +74,7 @@ export async function postUpload(req, res) {
   }
 
   const docObject = {
-    userId,
+    userId: user._id,
     name,
     type,
     isPublic: Boolean(isPublic),
@@ -128,16 +120,13 @@ export async function postUpload(req, res) {
  */
 export async function getShow(req, res) {
   const fileId = req.params.id;
-  const token = req.headers['x-token'];
-  const userId = await redisClient.get(`auth_${token}`);
-  const user = await dbClient.getDoc('users', { _id: userId });
-
+  const user = await getUserFromToken(req.headers['x-token']);
   if (!user) {
     res.status(401).json({ error: 'Unauthorized' });
     return;
   }
 
-  const file = await dbClient.getDoc('files', { _id: fileId, userId });
+  const file = await dbClient.getDoc('files', { _id: fileId, userId: user.id });
   if (!file) {
     res.status(404).json({ error: 'Not found' });
     return;
@@ -160,9 +149,7 @@ export async function getIndex(req, res) {
   const pageNumber = req.query.page || 0; // current page number
   const filesParentId = req.query.parentId || 0; // by default it the root dir
 
-  const token = req.headers['x-token'];
-  const userId = await redisClient.get(`auth_${token}`);
-  const user = await dbClient.getDoc('users', { _id: userId });
+  const user = await getUserFromToken(req.headers['x-token']);
 
   if (!user) {
     res.status(401).json({ error: 'Unauthorized' });
@@ -171,7 +158,7 @@ export async function getIndex(req, res) {
 
   const result = await dbClient.paginate(
     'files',
-    { userId, parentId: filesParentId },
+    { userId: user.id, parentId: filesParentId },
     pageNumber * MAX_ITEMS,
     MAX_ITEMS,
   );

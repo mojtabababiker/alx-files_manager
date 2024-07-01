@@ -26,6 +26,25 @@ async function validatePassword(password, hashedPassword) {
   }
 }
 
+/**
+ * retrieve the user id from the auth token and return user
+ * object from database based on this id
+ * @param {string} token the authorization token string
+ * @returns {Promise<object||null>} returns the user object or null if in error
+ */
+async function getUserFromToken(token) {
+  try {
+    const userId = await redisClient.get(`auth_${token}`);
+    const user = await dbClient.getDoc('users', { _id: userId });
+    if (!user) {
+      return null;
+    }
+    return user;
+  } catch (error) {
+    return null;
+  }
+}
 export {
-  dbClient, redisClient, addAccessToken, validatePassword,
+  dbClient, redisClient, addAccessToken,
+  validatePassword, getUserFromToken,
 };

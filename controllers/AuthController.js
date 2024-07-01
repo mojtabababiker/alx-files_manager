@@ -2,7 +2,8 @@
  * api Authentication endpoints definitions
  */
 import {
-  dbClient, redisClient, validatePassword, addAccessToken,
+  dbClient, redisClient, validatePassword,
+  addAccessToken, getUserFromToken,
 } from '../utils/utils';
 
 /**
@@ -66,17 +67,15 @@ export async function getConnect(req, res) {
 */
 export async function getDisconnect(req, res) {
   const token = req.headers['x-token'];
-  try {
-    const result = await redisClient.get(`auth_${token}`);
-    const user = await dbClient.getDoc('users', { _id: result });
-    // console.log(result);
-    if (user) {
+  const user = await getUserFromToken(token);
+  if (user) {
+    try {
       await redisClient.del(`auth_${token}`);
       res.status(204).json({});
       return;
+    } catch (error) {
+      // console.log(error.message);
     }
-  } catch (error) {
-    // console.log(error.message);
   }
   res.status(401).json({ error: 'Unauthorized' });
 }
@@ -91,20 +90,10 @@ export async function getDisconnect(req, res) {
   * @return object with user's email and id
 */
 export async function getMe(req, res) {
-  const token = req.headers['x-token'];
-  try {
-    const result = await redisClient.get(`auth_${token}`);
-    // console.log(result);
-    if (result) {
-      const user = await dbClient.getDoc('users', { _id: result });
-      if (user) {
-        res.json({ email: user.email, id: user._id });
-        return;
-      }
-    }
-  } catch (error) {
-    // console.log(error.message);
-    // throw error;
+  const user = await getUserFromToken(req.headers['x-token']);
+  if (user) {
+    res.json({ email: user.email, id: user._id });
+    return;
   }
   res.status(401).json({ error: 'Unauthorized' });
 }
