@@ -106,7 +106,37 @@ export class DBClient {
       return null;
     }
   }
-}
 
+  /**
+   * Paginate the database collection result based on the filters and, start and end
+   * return the result of the chunk as array of documents
+   * @param {string} collection the collection name to paginate
+   * @param {object} filters object of filters to apply on the query
+   * @param {int} start the start document
+   * @param {int} skip the end document
+   * @returns {Promise<Array<object>>} an array of the matched object from start to end
+   */
+  async paginate(collection, filters, start, end) {
+    try {
+      const result = await this.db.collection(collection)
+        .aggregate([
+          {
+            $match: { ...filters },
+          },
+          {
+            $skip: start,
+          },
+          {
+            $limit: end,
+          },
+        ])
+        .toArray();
+      return result;
+    } catch (error) {
+      console.log(error.message);
+      return [];
+    }
+  }
+}
 const dbClient = new DBClient();
 export default dbClient;

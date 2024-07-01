@@ -4,7 +4,7 @@
 import * as AppController from '../controllers/AppController';
 import postNew from '../controllers/UsersController';
 import * as AuthController from '../controllers/AuthController';
-import postUpload from '../controllers/FilesController';
+import { postUpload, getShow, getIndex } from '../controllers/FilesController';
 
 export default function signApp(app) {
   app.get('/status', AppController.getStatus);
@@ -21,4 +21,6 @@ export default function signApp(app) {
 
   // file endpoint
   app.post('/files', postUpload);
+  app.get('/files', getIndex);
+  app.get('/files/:id', getShow);
 }

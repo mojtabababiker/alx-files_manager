@@ -17,7 +17,7 @@ import {
  * @param {Object} res
  * @returns {Object} res
  */
-export default async function postUpload(req, res) {
+export async function postUpload(req, res) {
   const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
   let parentName = ''; // to save the file on if specified later
   let userId; // id of the owner of the file
@@ -114,4 +114,66 @@ export default async function postUpload(req, res) {
     return;
   }
   res.status(201).json({ id: fileId, ...docObject });
+}
+
+/**
+ * api get file endpoint based on the ID
+ * Description:
+ * - Login required, Retrieve a file with the id ID from DB
+ * - If the user is not found, return 401
+ * - If the requested file ID is not available return 404
+ * @param {Object} req
+ * @param {Object} res
+ * @returns {Object} res
+ */
+export async function getShow(req, res) {
+  const fileId = req.params.id;
+  const token = req.headers['x-token'];
+  const userId = await redisClient.get(`auth_${token}`);
+  const user = await dbClient.getDoc('users', { _id: userId });
+
+  if (!user) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+
+  const file = await dbClient.getDoc('files', { _id: fileId, userId });
+  if (!file) {
+    res.status(404).json({ error: 'Not found' });
+    return;
+  }
+  res.json(file);
+}
+
+/**
+ * api get file endpoint based on the ID
+ * Description:
+ * - Login required, Retrieve a file with the id ID from DB
+ * - If the user is not found, return 401
+ * - If the requested file ID is not available return 404
+ * @param {Object} req
+ * @param {Object} res
+ * @returns {Object} res
+ */
+export async function getIndex(req, res) {
+  const MAX_ITEMS = 20; // maximum files per page
+  const pageNumber = req.query.page || 0; // current page number
+  const filesParentId = req.query.parentId || 0; // by default it the root dir
+
+  const token = req.headers['x-token'];
+  const userId = await redisClient.get(`auth_${token}`);
+  const user = await dbClient.getDoc('users', { _id: userId });
+
+  if (!user) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+
+  const result = await dbClient.paginate(
+    'files',
+    { userId, parentId: filesParentId },
+    pageNumber * MAX_ITEMS,
+    MAX_ITEMS,
+  );
+  res.json(result);
 }
