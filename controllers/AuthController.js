@@ -92,7 +92,7 @@ export async function getDisconnect(req, res) {
 export async function getMe(req, res) {
   const user = await getUserFromToken(req.headers['x-token']);
   if (user) {
-    res.json({ email: user.email, id: user._id });
+    res.json({ id: user._id, email: user.email });
     return;
   }
   res.status(401).json({ error: 'Unauthorized' });
