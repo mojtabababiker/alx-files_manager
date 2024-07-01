@@ -108,6 +108,31 @@ export class DBClient {
   }
 
   /**
+   * update the document in the collection with the provided filters and update object
+   * @param {string} collection name of the collection to update its document
+   * @param {object} filters object of filters to apply on the query
+   * @param {update} update object of the fields to update
+   * @returns {Promise<object||null>} return the updated document or null in error
+   */
+  async updateDoc(collection, filters, update) {
+    try {
+      if ('_id' in filters) {
+        filters._id = new ObjectId(filters._id);  // eslint-disable-line
+      }
+      const doc = await this.db.collection(collection).findOneAndUpdate(
+        filters, { $set: update },
+        { returnDocument: 'after' },
+      );
+      console.log(doc);
+      const { _id, ...rest } = doc.value;
+      return { id: _id, ...rest };
+    } catch (error) {
+      // console.log(error.message);
+      return null;
+    }
+  }
+
+  /**
    * Paginate the database collection result based on the filters and, start and end
    * return the result of the chunk as array of documents
    * @param {string} collection the collection name to paginate

@@ -164,3 +164,59 @@ export async function getIndex(req, res) {
   );
   res.json(result);
 }
+
+/**
+ * api Edit file publish filed endpoint based on the ID
+ * Description:
+ * - Login required, Retrieve a file with the id ID from DB
+ * - If the user is not found, return 401
+ * - If the requested file ID is not available return 404
+ * - Edit the file publish filed to true
+ * @param {Object} req
+ * @param {Object} res
+ * @returns {Object} res
+ */
+export async function putPublish(req, res) {
+  const user = await getUserFromToken(req.headers['x-token']);
+  if (!user) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+  const fileId = req.params.id;
+  const updatedFile = await dbClient.updateDoc('files',
+    { _id: fileId, userId: user._id },
+    { isPublic: true });
+  if (!updatedFile) {
+    res.status(404).json({ error: 'Not found' });
+    return;
+  }
+  res.json(updatedFile);
+}
+
+/**
+ * api Edit file publish filed endpoint based on the ID
+ * Description:
+ * - Login required, Retrieve a file with the id ID from DB
+ * - If the user is not found, return 401
+ * - If the requested file ID is not available return 404
+ * - Edit the file publish filed to false
+ * @param {Object} req
+ * @param {Object} res
+ * @returns {Object} res
+ */
+export async function putUnpublish(req, res) {
+  const user = await getUserFromToken(req.headers['x-token']);
+  if (!user) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+  const fileId = req.params.id;
+  const updatedFile = await dbClient.updateDoc('files',
+    { _id: fileId, userId: user._id },
+    { isPublic: false });
+  if (!updatedFile) {
+    res.status(404).json({ error: 'Not found' });
+    return;
+  }
+  res.json(updatedFile);
+}
