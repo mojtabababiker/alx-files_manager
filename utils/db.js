@@ -131,9 +131,15 @@ export class DBClient {
           },
         ])
         .toArray();
+      result.map((doc, index) => {
+        const { _id, ...rest } = doc;
+        result[index] = { id: _id, ...rest }; // eslint-disable-line
+        return doc;
+      });
+      // console.log(result);
       return result;
     } catch (error) {
-      console.log(error.message);
+      // console.log(error.message);
       return [];
     }
   }

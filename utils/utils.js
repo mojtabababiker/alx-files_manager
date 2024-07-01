@@ -36,6 +36,7 @@ async function getUserFromToken(token) {
   try {
     const userId = await redisClient.get(`auth_${token}`);
     const user = await dbClient.getDoc('users', { _id: userId });
+    // console.log(user)
     if (!user) {
       return null;
     }

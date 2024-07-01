@@ -85,7 +85,7 @@ export async function postUpload(req, res) {
     await fs.mkdirAsync(path.join(folderPath, parentName),
       { recursive: true });
   } catch (error) {
-    console.log(error.message);
+    // console.log(error.message);
   }
   // save the file to database
   let fileId;
@@ -126,7 +126,7 @@ export async function getShow(req, res) {
     return;
   }
 
-  const file = await dbClient.getDoc('files', { _id: fileId, userId: user.id });
+  const file = await dbClient.getDoc('files', { _id: fileId, userId: user._id });
   if (!file) {
     res.status(404).json({ error: 'Not found' });
     return;
@@ -158,8 +158,8 @@ export async function getIndex(req, res) {
 
   const result = await dbClient.paginate(
     'files',
-    { userId: user.id, parentId: filesParentId },
-    pageNumber * MAX_ITEMS,
+    { userId: user._id, parentId: Number(filesParentId) },
+    Number(pageNumber) * MAX_ITEMS,
     MAX_ITEMS,
   );
   res.json(result);
