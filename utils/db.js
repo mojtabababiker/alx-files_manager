@@ -39,23 +39,23 @@ export class DBClient {
     return await this.db.collection('users').countDocuments(); // eslint-disable-line
   }
 
+  /**
+   * Get the number of documents on the collection files
+   * @returns {number}
+   */
   async nbFiles() {
-    /**
-     * Get the number of documents on the collection files
-     * @returns {number}
-     */
     if (!this.isAlive()) return 0;
     return await this.db.collection('files').countDocuments();  // eslint-disable-line
   }
 
+  /**
+   * Add new user to users collection, with the email and password
+   * if the email already registered an Error will be threw
+   * @param {string} email - the user email
+   * @param {string} password - user password
+   * @returns {object} an object contains user email and its id
+   */
   async addUser(email, password) {
-    /**
-     * Add new user to users collection, with the email and password
-     * if the email already registered an Error will be threw
-     * @param {string} email - the user email
-     * @param {string} password - user password
-     * @returns {object} an object contains user email and its id
-     */
     let user = await this.db.collection('users').findOne({ email });
     if (user) {
       // console.log(user);
@@ -73,6 +73,21 @@ export class DBClient {
   }
 
   /**
+   * add a new file document, with the attributes provided on docObject
+   * @param {ObjectId} docObject the file document attributes added to db
+   * @returns {Promise<string|null>} returns the created file id or null in error
+   */
+  async addFile(docObject) {
+    try {
+      const file = await this.db.collection('files').insertOne({ ...docObject });
+      return file.insertedId.toString();
+    } catch (error) {
+      // console.log(error.message);
+      return null;
+    }
+  }
+
+  /**
    * Get document from database filtered by filters object
    * @param {string} collection
    * @param {object} filters - object of the filters yo apply on the query
@@ -86,7 +101,7 @@ export class DBClient {
       const doc = await this.db.collection(collection).findOne(filters);
       return doc;
     } catch (error) {
-      console.log(error.message);
+      // console.log(error.message);
       // throw error
       return null;
     }
