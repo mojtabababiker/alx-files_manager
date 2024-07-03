@@ -250,7 +250,7 @@ export async function getFile(req, res) {
   if (file.isPublic === false) {
     const user = await getUserFromToken(req.headers['x-token']);
     if (!user || user._id.toString() !== file.userId) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(404).json({ error: 'Not found' });
       return;
     }
   }
@@ -263,10 +263,10 @@ export async function getFile(req, res) {
     fileData = await fs.readFileAsync(file.localPath);
   } catch (error) {
     // console.log(error.message);
-    res.status(400).json({ error: 'Not found' });
+    res.status(404).json({ error: 'Not found' });
     return;
   }
-  const mimeType = mime.lookup(file.name);
+  const mimeType = mime.lookup(file.name) || 'text/plain';
   res.setHeader('Content-Type', mimeType);
-  res.send(fileData);
+  res.end(fileData);
 }
