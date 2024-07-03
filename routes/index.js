@@ -4,9 +4,7 @@
 import * as AppController from '../controllers/AppController';
 import postNew from '../controllers/UsersController';
 import * as AuthController from '../controllers/AuthController';
-import {
-  postUpload, getShow, getIndex, putPublish, putUnpublish,
-} from '../controllers/FilesController';
+import * as FilesController from '../controllers/FilesController';
 
 export default function signApp(app) {
   app.get('/status', AppController.getStatus);
@@ -22,9 +20,10 @@ export default function signApp(app) {
   app.get('/users/me', AuthController.getMe);
 
   // file endpoint
-  app.post('/files', postUpload);
-  app.get('/files', getIndex);
-  app.get('/files/:id', getShow);
-  app.put('/files/:id/publish', putPublish);
-  app.put('/files/:id/unpublish', putUnpublish);
+  app.post('/files', FilesController.postUpload);
+  app.get('/files', FilesController.getIndex);
+  app.get('/files/:id', FilesController.getShow);
+  app.put('/files/:id/publish', FilesController.putPublish);
+  app.put('/files/:id/unpublish', FilesController.putUnpublish);
+  app.get('/files/:id/data', FilesController.getFile);
 }

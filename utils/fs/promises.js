@@ -9,6 +9,7 @@ import { promisify } from 'util';
 const fs = require('fs');
 
 fs.writeFileAsync = promisify(fs.writeFile).bind(fs);
+fs.readFileAsync = promisify(fs.readFile).bind(fs);
 fs.mkdirAsync = promisify(fs.mkdir).bind(fs);
 
 export default fs;

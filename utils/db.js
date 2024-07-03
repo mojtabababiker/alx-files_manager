@@ -101,7 +101,7 @@ export class DBClient {
       const doc = await this.db.collection(collection).findOne(filters);
       return doc;
     } catch (error) {
-      // console.log(error.message);
+      console.log(error.message);
       // throw error
       return null;
     }
@@ -123,7 +123,7 @@ export class DBClient {
         filters, { $set: update },
         { returnDocument: 'after' },
       );
-      console.log(doc);
+      // console.log(doc);
       const { _id, ...rest } = doc.value;
       return { id: _id, ...rest };
     } catch (error) {
@@ -138,10 +138,10 @@ export class DBClient {
    * @param {string} collection the collection name to paginate
    * @param {object} filters object of filters to apply on the query
    * @param {int} start the start document
-   * @param {int} skip the end document
+   * @param {int} $limit the end document
    * @returns {Promise<Array<object>>} an array of the matched object from start to end
    */
-  async paginate(collection, filters, start, end) {
+  async paginate(collection, filters, start, limit) {
     try {
       const result = await this.db.collection(collection)
         .aggregate([
@@ -152,7 +152,7 @@ export class DBClient {
             $skip: start,
           },
           {
-            $limit: end,
+            $limit: limit,
           },
         ])
         .toArray();

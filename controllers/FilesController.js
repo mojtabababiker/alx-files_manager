@@ -2,6 +2,7 @@
  * api Authentication endpoints definitions
  */
 import * as path from 'path';
+import * as mime from 'mime-types';
 import fs from '../utils/fs/promises';
 import {
   dbClient, getUserFromToken, addAccessToken,
@@ -224,4 +225,48 @@ export async function putUnpublish(req, res) {
   }
   const { _id, ...rest } = updatedFile;
   res.json({ id: _id, ...rest });
+}
+
+/**
+ * api Edit file publish filed endpoint based on the ID
+ * Description:
+ * - Login required, Retrieve a file with the id ID from DB
+ * - If the user is not found, return 401
+ * - If the requested file ID is not available return 404
+ * - Edit the file publish filed to false
+ * @param {Object} req
+ * @param {Object} res
+ * @returns {Object} res
+ */
+export async function getFile(req, res) {
+  let fileData;
+  const fileId = req.params.id;
+  // console.log(fileId)
+  const file = await dbClient.getDoc('files', { _id: fileId });
+  if (!file) {
+    res.status(404).json({ error: 'Not found' });
+    return;
+  }
+  if (file.isPublic === false) {
+    const user = await getUserFromToken(req.headers['x-token']);
+    if (!user || user._id.toString() !== file.userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+  }
+  if (file.type === 'folder') {
+    res.status(400).json({ error: 'A folder doesn\'t have content' });
+    return;
+  }
+
+  try {
+    fileData = await fs.readFileAsync(file.localPath);
+  } catch (error) {
+    // console.log(error.message);
+    res.status(400).json({ error: 'Not found' });
+    return;
+  }
+  const mimeType = mime.lookup(file.name);
+  res.setHeader('Content-Type', mimeType);
+  res.send(fileData);
 }
