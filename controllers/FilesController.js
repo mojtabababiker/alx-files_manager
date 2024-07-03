@@ -4,7 +4,7 @@
 import * as path from 'path';
 import fs from '../utils/fs/promises';
 import {
-  dbClient, getUserFromToken,
+  dbClient, getUserFromToken, addAccessToken,
 } from '../utils/utils';
 
 /**
@@ -73,6 +73,8 @@ export async function postUpload(req, res) {
     return;
   }
 
+  const localPath = path.join(folderPath, parentName);
+  const fileName = addAccessToken();
   const docObject = {
     userId: user._id,
     name,
@@ -82,24 +84,24 @@ export async function postUpload(req, res) {
   };
   // creating the holding directory
   try {
-    await fs.mkdirAsync(path.join(folderPath, parentName),
-      { recursive: true });
+    await fs.mkdirAsync(localPath, { recursive: true });
   } catch (error) {
     // console.log(error.message);
   }
   // save the file to database
   let fileId;
   try {
-    fileId = await dbClient.addFile(docObject);
+    fileId = await dbClient.addFile({ ...docObject, localPath: path.join(localPath, fileName) });
   } catch (error) {
     res.status(500).json({ error: `Enteral server error ${error.message}` });
+    // fs.unlinkAsync(localPath);
     return;
   }
   // save the file to local disk
   try {
     const encodeType = type === 'image' ? 'binary' : 'utf-8';
-    await fs.writeFileAsync(path.join(folderPath, parentName, fileId),
-      Buffer.from(data, 'base64'), { encoding: encodeType });
+    await fs.writeFileAsync(path.join(localPath, fileName), Buffer.from(data, 'base64'),
+      { encoding: encodeType });
   } catch (error) {
     // console.log(error.message);
     res.status(500).json({ error: `Enteral server error ${error.message}` });
