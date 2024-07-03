@@ -39,7 +39,7 @@ export async function getConnect(req, res) {
     }
 
     // validate password
-    const validPassword = validatePassword(pwd, user.password);
+    const validPassword = await validatePassword(pwd, user.password);
     if (!validPassword) {
       // console.log("Wrong pwd");
       res.status(401).json({ error: 'Unauthorized' });
@@ -52,7 +52,7 @@ export async function getConnect(req, res) {
     res.json({ token });
   } catch (error) {
     // console.log(error.message);
-    res.status(400).json({ error: 'Bad Auth Schema' });
+    res.status(401).json({ error: 'Unauthorized' });
   }
 }
 
@@ -71,7 +71,7 @@ export async function getDisconnect(req, res) {
   if (user) {
     try {
       await redisClient.del(`auth_${token}`);
-      res.status(204).json({});
+      res.status(204).end();
       return;
     } catch (error) {
       // console.log(error.message);
