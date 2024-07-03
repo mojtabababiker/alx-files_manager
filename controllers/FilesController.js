@@ -49,7 +49,7 @@ export async function postUpload(req, res) {
         res.status(400).json({ error: 'Parent is not folder' });
         return;
       }
-      parentName = ''; //parent.name; // update the parent name above
+      parentName = ''; // parent.name; update the parent name above
     } catch (error) {
       res.status(400).json({ error: 'Parent not found' });
       return;
@@ -61,7 +61,7 @@ export async function postUpload(req, res) {
       userId: user._id,
       name,
       type,
-      isPublic: Boolean(isPublic),
+      // isPublic: Boolean(isPublic),
       parentId: parentId !== undefined ? parentId : 0,
     };
     try {
