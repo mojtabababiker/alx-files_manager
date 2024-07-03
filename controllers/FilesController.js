@@ -133,7 +133,8 @@ export async function getShow(req, res) {
     res.status(404).json({ error: 'Not found' });
     return;
   }
-  res.json(file);
+  const { _id, ...fileObject } = file;
+  res.json({ id: _id, ...fileObject });
 }
 
 /**
