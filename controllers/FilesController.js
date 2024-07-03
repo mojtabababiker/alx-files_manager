@@ -161,7 +161,7 @@ export async function getIndex(req, res) {
 
   const result = await dbClient.paginate(
     'files',
-    { userId: user._id, parentId: Number(filesParentId) },
+    { userId: user._id, parentId: filesParentId },
     Number(pageNumber) * MAX_ITEMS,
     MAX_ITEMS,
   );
@@ -193,7 +193,8 @@ export async function putPublish(req, res) {
     res.status(404).json({ error: 'Not found' });
     return;
   }
-  res.json(updatedFile);
+  const { _id, ...rest } = updatedFile;
+  res.json({ id: _id, ...rest });
 }
 
 /**
@@ -221,5 +222,6 @@ export async function putUnpublish(req, res) {
     res.status(404).json({ error: 'Not found' });
     return;
   }
-  res.json(updatedFile);
+  const { _id, ...rest } = updatedFile;
+  res.json({ id: _id, ...rest });
 }
